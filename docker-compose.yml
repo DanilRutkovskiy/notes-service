@@ -84,7 +84,7 @@ services:
       --password=password
       --driver=org.postgresql.Driver
       --classpath=/liquibase/changelog/postgresql-42.7.3.jar
-      --changeLogFile=changelog/db/changelog/db.changelog-master.xml
+      --changeLogFile=changelog/db/db.changelog-master.xml
       update"
     depends_on:
       - postgres
