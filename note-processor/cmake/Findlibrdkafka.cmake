@@ -16,9 +16,6 @@ if(NOT LZ4_LIBRARY)
 endif()
 
 find_path(LIBRDKAFKA_INCLUDE_DIR NAMES librdkafka/rdkafka.h PATHS "${CMAKE_CURRENT_LIST_DIR}/${VCPKG_ROOT}/include" NO_DEFAULT_PATH)
-if(NOT LIBRDKAFKA_INCLUDE_DIR)
-  message(FATAL_ERROR "Could not find librdkafka include directory")
-endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(librdkafka DEFAULT_MSG LIBRDKAFKA_LIBRARY LIBRDKAFKA_INCLUDE_DIR)

@@ -49,15 +49,15 @@ int main()
                 std::string content = json["content"].asString();
 
                 pqxx::work tx(conn);
-                tx.exec_params("INSERT INTO notes (id, user_id, title, content) "
-                               "VALUES ($1, $2, $3, $4)", noteId, userId, title, content);
+                tx.exec("INSERT INTO notes (id, user_id, title, content) "
+                        "VALUES ($1, $2, $3, $4)", {noteId, userId, title, content});
 
                 tx.commit();
 
                 clickhouse::Block block;
-                block.AppendColumn("user_id", std::make_shared<clickhouse::ColumnUInt64>(userId));
-                block.AppendColumn("event_type", std::make_shared<clickhouse::ColumnString>("create"));
-                block.AppendColumn("timestamp", std::make_shared<clickhouse::ColumnUInt32>(static_cast<uint32_t>(std::time(nullptr))));
+                //block.AppendColumn("user_id", std::make_shared<clickhouse::ColumnUInt64>(static_cast<uint64_t>(std::stoul(userId))));
+                //block.AppendColumn("event_type", std::make_shared<clickhouse::ColumnString>("create"));
+                //block.AppendColumn("timestamp", std::make_shared<clickhouse::ColumnUInt32>(static_cast<uint32_t>(std::time(nullptr))));
 
                 clickhouseClient.Insert("note_analytics", block);
 
@@ -68,4 +68,6 @@ int main()
         delete msg;
         consumer->commitSync();
     }
+
+    return 0;
 }

@@ -19,7 +19,8 @@ target_include_directories(api-service PRIVATE src ${librdkafka_INCLUDE_DIRS})
 target_link_libraries(api-service PRIVATE 
     Drogon::Drogon
     hiredis::hiredis
-    ${librdkafka_LIBRARIES}
+    ${librdkafka_LIBS}
     prometheus-cpp::core
+    prometheus-cpp::pull
     spdlog::spdlog
 )
