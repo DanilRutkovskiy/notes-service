@@ -1,0 +1,3 @@
+/home/danil/projects/notes-service/api-service/build/CMakeFiles/api-service.dir
+/home/danil/projects/notes-service/api-service/build/CMakeFiles/edit_cache.dir
+/home/danil/projects/notes-service/api-service/build/CMakeFiles/rebuild_cache.dir

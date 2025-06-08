@@ -16,7 +16,10 @@ public:
     METHOD_LIST_END
 
     void createNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, int id);
+
+private:
+    int64_t currentTimestamp() const;
 
 private:
     redisContext* m_redis;
