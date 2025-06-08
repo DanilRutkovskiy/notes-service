@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.29)
+project(api-service)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Drogon CONFIG REQUIRED)
+find_package(hiredis CONFIG REQUIRED)
+find_package(librdkafka CONFIG REQUIRED)
+find_package(prometheus-cpp CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+
+add_executable(api-service src/main.cpp src/note_controller.cpp)
+
+target_link_libraries(api-service PRIVATE 
+    Drogon::Drogon
+    hiredis::hiredis
+    RdKafka::rdkafka
+    prometheus-cpp::core
+    spdlog::spdlog
+)
+
+target_include_directories(api-service PRIVATE src)
