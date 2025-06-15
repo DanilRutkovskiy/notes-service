@@ -6,7 +6,7 @@
 
 NoteController::NoteController()
 {
-    m_redis = redisConnect("redis", 6379);
+    m_redis = redisConnect("localhost", 6379);
     if (m_redis == nullptr || m_redis->err)
     {
         spdlog::error("Redis connection error: {}", m_redis ? m_redis->errstr : "context is not allocated");
@@ -16,7 +16,7 @@ NoteController::NoteController()
 
     std::string err;
     auto conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-    conf->set("bootstrap.servers", "kafka:9092", err);
+    conf->set("bootstrap.servers", "localhost:9092", err);
     m_kafkaProducer = std::unique_ptr<RdKafka::Producer>(RdKafka::Producer::create(conf, err));
     if (!m_kafkaProducer)
     {

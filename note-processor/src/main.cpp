@@ -9,7 +9,7 @@ int main()
 {
     std::string err;
     auto conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-    conf->set("bootstrap.servers", "kafka:9092", err);
+    conf->set("bootstrap.servers", "localhost:9092", err);
     conf->set("group.id", "note-processor-group", err);
     auto consumer = std::unique_ptr<RdKafka::KafkaConsumer>(RdKafka::KafkaConsumer::create(conf, err));
     if (!consumer)
@@ -20,14 +20,14 @@ int main()
 
     consumer->subscribe({"notes-topic"});
 
-    pqxx::connection conn("host= postgres port=5432 dbname=notes-db user=user password=password");
+    pqxx::connection conn("host = localhost port=5432 dbname=notes-db user=user password=password");
     if (!conn.is_open())
     {
         spdlog::error("PotgreSQL connection failed");
         return 1;
     }
 
-    clickhouse::Client clickhouseClient(clickhouse::ClientOptions().SetHost("clickhouse").SetPort(9000));
+    clickhouse::Client clickhouseClient(clickhouse::ClientOptions().SetHost("localhost").SetPort(9000).SetUser("default").SetPassword("password"));
 
     while(true)
     {
@@ -55,9 +55,17 @@ int main()
                 tx.commit();
 
                 clickhouse::Block block;
-                //block.AppendColumn("user_id", std::make_shared<clickhouse::ColumnUInt64>(static_cast<uint64_t>(std::stoul(userId))));
-                //block.AppendColumn("event_type", std::make_shared<clickhouse::ColumnString>("create"));
-                //block.AppendColumn("timestamp", std::make_shared<clickhouse::ColumnUInt32>(static_cast<uint32_t>(std::time(nullptr))));
+                auto userColumn = std::make_shared<clickhouse::ColumnUInt64>();
+                userColumn->Append(static_cast<uint64_t>(std::stoul(userId)));
+                block.AppendColumn("user_id", userColumn);
+
+                auto eventColumn = std::make_shared<clickhouse::ColumnString>();
+                eventColumn->Append("create");
+                block.AppendColumn("event_type", eventColumn);
+
+                auto timeColumn = std::make_shared<clickhouse::ColumnUInt32>();
+                timeColumn->Append(static_cast<uint32_t>(std::time(nullptr)));
+                block.AppendColumn("timestamp", eventColumn);
 
                 clickhouseClient.Insert("note_analytics", block);
 
