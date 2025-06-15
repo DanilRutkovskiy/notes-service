@@ -49,7 +49,7 @@ int main()
                 std::string content = json["content"].asString();
 
                 pqxx::work tx(conn);
-                tx.exec("INSERT INTO notes (id, user_id, title, content) "
+                tx.exec("INSERT INTO notes (note_id, user_id, title, content) "
                         "VALUES ($1, $2, $3, $4)", {noteId, userId, title, content});
 
                 tx.commit();
@@ -65,7 +65,7 @@ int main()
 
                 auto timeColumn = std::make_shared<clickhouse::ColumnUInt32>();
                 timeColumn->Append(static_cast<uint32_t>(std::time(nullptr)));
-                block.AppendColumn("timestamp", eventColumn);
+                block.AppendColumn("timestamp", timeColumn);
 
                 clickhouseClient.Insert("note_analytics", block);
 

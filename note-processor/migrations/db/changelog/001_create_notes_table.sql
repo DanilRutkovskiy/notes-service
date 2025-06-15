@@ -1,6 +1,7 @@
 --changeset danil:1
 CREATE TABLE notes (
     id SERIAL PRIMARY KEY,
+    note_id TEXT NOT NULL,
     user_id VARCHAR(50) NOT NULL,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
