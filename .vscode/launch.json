@@ -1,21 +1,46 @@
 {
   "version": "0.2.0",
+  "compounds": [
+  {
+    "name": "Launch Both Services",
+    "configurations": ["note-processor", "api-service"]
+  }
+],
   "configurations": [
     {
-      "name": "Run note-processor",
+      "name": "note-processor",
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/note-processor/build/note-processor",  // executable path
       "args": [],  // pass any args here
-      "stopAtEntry": false,
+      "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [],
       "externalConsole": false,  // set true if you want an external terminal
-      "MIMode": "lldb",          // Use lldb debugger for clang
+      "MIMode": "gdb",          // Use lldb debugger for clang
       "setupCommands": [
         {
-          "description": "Enable pretty-printing for lldb",
-          "text": "type summary add --summary-string \"${var}\" --regex true",
+          "description": "Enable pretty-printing",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    },
+        {
+      "name": "api-service",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/api-service/build/api-service",  // executable path
+      "args": [],  // pass any args here
+      "stopAtEntry": true,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,  // set true if you want an external terminal
+      "MIMode": "gdb",          // Use lldb debugger for clang
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing",
+          "text": "-enable-pretty-printing",
           "ignoreFailures": true
         }
       ]

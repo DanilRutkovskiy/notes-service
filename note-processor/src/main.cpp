@@ -53,7 +53,8 @@ int main()
                         "VALUES ($1, $2, $3, $4)", {noteId, userId, title, content});
 
                 tx.commit();
-
+                
+                /*
                 clickhouse::Block block;
                 auto userColumn = std::make_shared<clickhouse::ColumnUInt64>();
                 userColumn->Append(static_cast<uint64_t>(std::stoul(userId)));
@@ -68,6 +69,7 @@ int main()
                 block.AppendColumn("timestamp", timeColumn);
 
                 clickhouseClient.Insert("note_analytics", block);
+                */
 
                 spdlog::info("Processed note id: {}", noteId);
             }
