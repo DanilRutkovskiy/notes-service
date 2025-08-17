@@ -1,0 +1,17 @@
+{
+    "name": "note-service",
+    "version-string": "1.0.0",
+    "dependencies": [
+        {
+            "name": "drogon",
+            "version>=": "1.9.10"
+        }
+    ],
+    "overrides": [
+    {
+      "name": "trantor",
+      "version": "1.5.24"
+    }
+    ],
+    "builtin-baseline": "40619a55c3e76dc4005c8d1b7395071471bb8b96"
+}

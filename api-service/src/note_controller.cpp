@@ -1,11 +1,14 @@
 #include "note_controller.h"
 
+/*
 #include <drogon/HttpResponse.h>
 #include <json/json.h>
 #include <spdlog/spdlog.h>
+*/
 
 NoteController::NoteController()
 {
+    /*
     m_redis = redisConnect("localhost", 6379);
     if (m_redis == nullptr || m_redis->err)
     {
@@ -23,10 +26,12 @@ NoteController::NoteController()
         spdlog::error("Kafka producer creation failed: {}", err);
         throw std::runtime_error("Kafka producer creation failed");
     }
+    */
 }
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
+    /*
     const auto json = req->getJsonObject();
     if (!json)
     {
@@ -65,10 +70,12 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
     resp->setStatusCode(drogon::k200OK);
     resp->setBody("Note created with id: " + noteId);
     callback(resp);
+    */
 }
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, int id)
 {
+    /*
     const auto noteId = std::to_string(id);
 
     redisReply* reply = static_cast<redisReply*>(redisCommand(m_redis, "HGETALL note:%s", noteId.c_str()));
@@ -92,6 +99,7 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
     Json::StreamWriterBuilder writer;
     const auto resp = drogon::HttpResponse::newHttpJsonResponse(note);
     callback(resp);
+    */
 }
 
 int64_t NoteController::currentTimestamp() const

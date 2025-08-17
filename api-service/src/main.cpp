@@ -1,8 +1,10 @@
+/*
 #include <drogon/drogon.h>
 #include <prometheus/exposer.h>
 #include <spdlog/spdlog.h>
 #include <prometheus/registry.h>
 #include <prometheus/counter.h>
+*/
 
 int main()
 {
@@ -11,9 +13,9 @@ int main()
     //auto& counter = prometheus::BuildCounter().Name("requests_total").Help("Total HTTP requests").Register(*registry);
     //exposer.RegisterCollectable(registry);
 
-    spdlog::set_level(spdlog::level::info);
+    //spdlog::set_level(spdlog::level::info);
 
-    drogon::app().addListener("0.0.0.0", 8080).setThreadNum(4).run();
+    //drogon::app().addListener("0.0.0.0", 8080).setThreadNum(4).run();
 
     return 0;
 }

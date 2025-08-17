@@ -30,13 +30,13 @@
       "name": "api-service",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/api-service/build/api-service",  // executable path
+      "program": "${workspaceFolder}/build/api-service/api-service",  // executable path
       "args": [],  // pass any args here
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [],
-      "externalConsole": false,  // set true if you want an external terminal
-      "MIMode": "gdb",          // Use lldb debugger for clang
+      "externalConsole": false,
+      "MIMode": "gdb", 
       "setupCommands": [
         {
           "description": "Enable pretty-printing",

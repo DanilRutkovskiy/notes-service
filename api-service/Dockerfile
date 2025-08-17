@@ -10,4 +10,4 @@ RUN mkdir build && cd build && \
     cmake --build . --config Release
 
 EXPOSE 8080
-CMD ["./build/api-seervice"]
+CMD ["./build/api-service"]
