@@ -76,7 +76,8 @@
     "complex": "cpp",
     "csignal": "cpp",
     "fstream": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "*.in": "cpp"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",

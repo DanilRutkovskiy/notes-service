@@ -17,7 +17,14 @@ set(API_SERVICE_SOURCE
 
 add_executable(api-service ${API_SERVICE_SOURCE})
 
-target_include_directories(api-service PRIVATE include)
+target_precompile_headers(api-service PRIVATE
+    "src/pch.hpp"
+)
+
+target_include_directories(api-service PRIVATE 
+    "include"
+    "${CMAKE_BINARY_DIR}/configured_files/include"
+)
 
 target_link_libraries(api-service PRIVATE 
     Drogon::Drogon

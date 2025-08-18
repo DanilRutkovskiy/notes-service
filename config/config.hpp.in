@@ -1,0 +1,9 @@
+#pragma once
+
+#include <string_view>
+
+namespace Config
+{
+    static constexpr std::string_view redisHost = "@REDIS_HOST@";
+    static constexpr uint32_t redisPort = @REDIS_PORT@;
+}

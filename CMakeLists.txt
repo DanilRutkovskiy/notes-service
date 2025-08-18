@@ -12,6 +12,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(USE_VCPKG "Whether to use VCPKG" ON)
 
+#CONFIG
+    ##REDIS
+    set(REDIS_PORT "6379")
+    set(REDIS_HOST "127.0.0.1")
+
 if(USE_VCPKG)
     message(STATUS "Using VCPKG")
     include(${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake)
@@ -19,3 +24,4 @@ if(USE_VCPKG)
 endif()
 
 add_subdirectory(api-service)
+add_subdirectory(config)

@@ -1,7 +1,6 @@
 
 #include <drogon/drogon.h>
 //#include <prometheus/exposer.h>
-#include <spdlog/spdlog.h>
 //#include <prometheus/registry.h>
 //#include <prometheus/counter.h>
 

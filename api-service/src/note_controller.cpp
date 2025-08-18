@@ -1,12 +1,11 @@
 #include "note_controller.h"
 
-#include <spdlog/spdlog.h>
 #include <drogon/HttpResponse.h>
-#include <nlohmann/json.hpp>
+#include <config.hpp>
 
 NoteController::NoteController()
 {
-    m_redis = redisConnect("localhost", 6379);
+    m_redis = redisConnect(Config::redisHost.data(), Config::redisPort);
     if (m_redis == nullptr || m_redis->err)
     {
         spdlog::error("Redis connection error: {}", m_redis ? m_redis->errstr : "context is not allocated");
