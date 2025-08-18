@@ -16,6 +16,9 @@ option(USE_VCPKG "Whether to use VCPKG" ON)
     ##REDIS
     set(REDIS_PORT "6379")
     set(REDIS_HOST "127.0.0.1")
+    ##KAFKA
+    set(KAFKA_PORT "9092")
+    set(KAFKA_HOST "127.0.0.1")
 
 if(USE_VCPKG)
     message(STATUS "Using VCPKG")

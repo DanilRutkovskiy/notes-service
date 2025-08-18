@@ -15,7 +15,7 @@ NoteController::NoteController()
 
     std::string err;
     auto conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
-    conf->set("bootstrap.servers", "localhost:9092", err);
+    conf->set("bootstrap.servers", Config::kafkaConnection.data(), err);
     m_kafkaProducer = std::unique_ptr<RdKafka::Producer>(RdKafka::Producer::create(conf, err));
     if (!m_kafkaProducer)
     {
