@@ -1,14 +1,14 @@
 #include "note_controller.h"
 
+#include <spdlog/spdlog.h>
 /*
 #include <drogon/HttpResponse.h>
 #include <json/json.h>
-#include <spdlog/spdlog.h>
 */
 
 NoteController::NoteController()
 {
-    /*
+    
     m_redis = redisConnect("localhost", 6379);
     if (m_redis == nullptr || m_redis->err)
     {
@@ -26,7 +26,7 @@ NoteController::NoteController()
         spdlog::error("Kafka producer creation failed: {}", err);
         throw std::runtime_error("Kafka producer creation failed");
     }
-    */
+    
 }
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)

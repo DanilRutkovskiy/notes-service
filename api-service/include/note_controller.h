@@ -1,8 +1,8 @@
 #pragma once
 
 #include <drogon/HttpController.h>
-//#include <hiredis/hiredis.h>
-//#include <librdkafka/rdkafkacpp.h>
+#include <hiredis/hiredis.h>
+#include <librdkafka/rdkafkacpp.h>
 #include <string>
 
 class NoteController : public drogon::HttpController<NoteController>
@@ -22,7 +22,7 @@ private:
     int64_t currentTimestamp() const;
 
 private:
-    //redisContext* m_redis;
-    //std::unique_ptr<RdKafka::Producer> m_kafkaProducer;
+    redisContext* m_redis;
+    std::unique_ptr<RdKafka::Producer> m_kafkaProducer;
     const std::string m_kafkaTopic = "notes-topic";
 };

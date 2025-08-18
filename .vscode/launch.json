@@ -16,7 +16,7 @@
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [],
-      "externalConsole": false,  // set true if you want an external terminal
+      "externalConsole": true,  // set true if you want an external terminal
       "MIMode": "gdb",          // Use lldb debugger for clang
       "setupCommands": [
         {

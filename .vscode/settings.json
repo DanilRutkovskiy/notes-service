@@ -131,13 +131,15 @@
   "C_Cpp_Runner.showCompilationTime": false,
   "C_Cpp_Runner.useLinkTimeOptimization": false,
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
-
-    "cmake.configureOnOpen": false,
-    "cmake.autoSelectActiveFolder": false,
-    "cmake.configureOnEdit": false,
-    "[cmake]": {
-        "editor.formatOnSave": false,
-        "editor.defaultFormatter": "cheshirekow.cmake-format"
-    },
-    "cmake.options.statusBarVisibility": "visible",
+//Intellisense
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+//CMake options
+  "cmake.configureOnOpen": false,
+  "cmake.autoSelectActiveFolder": false,
+  "cmake.configureOnEdit": false,
+  "[cmake]": {
+      "editor.formatOnSave": false,
+      "editor.defaultFormatter": "cheshirekow.cmake-format"
+  },
+  "cmake.options.statusBarVisibility": "visible",
 }
