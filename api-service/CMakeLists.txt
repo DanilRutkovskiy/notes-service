@@ -8,7 +8,7 @@ find_package(Drogon CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(hiredis CONFIG REQUIRED)
 find_package(RdKafka CONFIG REQUIRED)
-find_package(jsoncpp CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 set(API_SERVICE_SOURCE
     "src/main.cpp" 
@@ -24,7 +24,7 @@ target_link_libraries(api-service PRIVATE
     hiredis::hiredis
     RdKafka::rdkafka
     RdKafka::rdkafka++
-    JsonCpp::JsonCpp
+    nlohmann_json::nlohmann_json
     #prometheus-cpp::core
     #prometheus-cpp::pull
     spdlog::spdlog

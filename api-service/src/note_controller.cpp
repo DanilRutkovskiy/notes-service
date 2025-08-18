@@ -2,7 +2,7 @@
 
 #include <spdlog/spdlog.h>
 #include <drogon/HttpResponse.h>
-#include <json/json.h>
+#include <nlohmann/json.hpp>
 
 NoteController::NoteController()
 {
@@ -28,6 +28,7 @@ NoteController::NoteController()
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
+    /*
     const auto json = req->getJsonObject();
     if (!json)
     {
@@ -66,12 +67,12 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
     resp->setStatusCode(drogon::k200OK);
     resp->setBody("Note created with id: " + noteId);
     callback(resp);
+    */
 }
 
-void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, int id)
+void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
 {
-    const auto noteId = std::to_string(id);
-
+    /*
     redisReply* reply = static_cast<redisReply*>(redisCommand(m_redis, "HGETALL note:%s", noteId.c_str()));
     if (reply == nullptr || reply->elements == 0)
     {
@@ -93,6 +94,7 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
     Json::StreamWriterBuilder writer;
     const auto resp = drogon::HttpResponse::newHttpJsonResponse(note);
     callback(resp);
+    */
 }
 
 int64_t NoteController::currentTimestamp() const

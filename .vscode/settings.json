@@ -72,7 +72,11 @@
     "cinttypes": "cpp",
     "typeinfo": "cpp",
     "variant": "cpp",
-    "pqxx": "cpp"
+    "pqxx": "cpp",
+    "complex": "cpp",
+    "csignal": "cpp",
+    "fstream": "cpp",
+    "shared_mutex": "cpp"
   },
   "C_Cpp_Runner.msvcBatchPath": "",
   "C_Cpp_Runner.cCompilerPath": "gcc",
