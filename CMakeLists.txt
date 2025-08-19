@@ -19,11 +19,13 @@ option(USE_VCPKG "Whether to use VCPKG" ON)
     ##KAFKA
     set(KAFKA_PORT "9092")
     set(KAFKA_HOST "127.0.0.1")
+    ##api-service
+    set(API_SERVICE_HOST "0.0.0.0")
+    set(API_SERVICE_PORT "8080")
 
 if(USE_VCPKG)
     message(STATUS "Using VCPKG")
     include(${CMAKE_SOURCE_DIR}/external/vcpkg/scripts/buildsystems/vcpkg.cmake)
-    find_package(Drogon REQUIRED)
 endif()
 
 add_subdirectory(api-service)

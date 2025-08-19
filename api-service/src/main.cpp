@@ -1,5 +1,6 @@
 
 #include <drogon/drogon.h>
+#include <config.hpp>
 //#include <prometheus/exposer.h>
 //#include <prometheus/registry.h>
 //#include <prometheus/counter.h>
@@ -14,7 +15,7 @@ int main()
 
     spdlog::set_level(spdlog::level::info);
 
-    drogon::app().addListener("0.0.0.0", 8080).setThreadNum(4).run();
+    drogon::app().addListener(Config::apiServiceHost.data(), Config::apiServicePort).setThreadNum(4).run();
 
     return 0;
 }
