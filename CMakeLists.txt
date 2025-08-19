@@ -29,5 +29,6 @@ if(USE_VCPKG)
 endif()
 
 add_subdirectory(api-service)
+add_subdirectory(note-processor)
 add_subdirectory(config)
 add_subdirectory(common)

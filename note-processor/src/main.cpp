@@ -1,6 +1,6 @@
 #include <librdkafka/rdkafkacpp.h>
 #include <pqxx/pqxx>
-#include <clickhouse/client.h>
+//#include <clickhouse/client.h>
 #include <spdlog/spdlog.h>
 #include <json/json.h>
 #include <memory>
@@ -27,7 +27,7 @@ int main()
         return 1;
     }
 
-    clickhouse::Client clickhouseClient(clickhouse::ClientOptions().SetHost("localhost").SetPort(9000).SetUser("default").SetPassword("password"));
+    //clickhouse::Client clickhouseClient(clickhouse::ClientOptions().SetHost("localhost").SetPort(9000).SetUser("default").SetPassword("password"));
 
     while(true)
     {

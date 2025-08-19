@@ -42,22 +42,13 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
-    //TODO - make deserealisation
-    const auto userId = (*json)["user_id"].asString();
-    const auto title = (*json)["title"].asString();
-    const auto content = (*json)["content"].asString();
-
-    //TODO - change to real uid generation
-    const auto noteId = std::to_string(std::hash<std::string>{}(userId + title + content));
-    
-    redisCommand(m_redis, "HMSET note:%s user_id %s title %s content %s", noteId, userId, title, content);
+    //redisCommand(m_redis, "HMSET note:%s user_id %s title %s content %s", noteId, userId, title, content);
 
     Json::Value kafkaMessage;
-    kafkaMessage["note_id"] = noteId;
-    kafkaMessage["user_id"] = userId;
-    kafkaMessage["title"] = title;
-    kafkaMessage["content"] = content;
-    kafkaMessage["action"] = "create";//TODO - store commands somewhere
+    kafkaMessage["user_id"] = body.userId;
+    kafkaMessage["title"] = body.title;
+    kafkaMessage["content"] = body.content;
+    kafkaMessage["action"] = "create";
     
     Json::StreamWriterBuilder writer;
     std::string message = Json::writeString(writer, kafkaMessage);
@@ -68,7 +59,7 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 
     auto resp = drogon::HttpResponse::newHttpResponse();
     resp->setStatusCode(drogon::k200OK);
-    resp->setBody("Note created with id: " + noteId);
+    resp->setBody("Note created for user: " + body.userId);
     callback(resp);
 }
 

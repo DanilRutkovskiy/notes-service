@@ -534,6 +534,8 @@ namespace TemplateParser
                 return ParseError("error validate: ").addSubError(std::move(errorValidate));
             }
 
+            const auto srcKeys = src.getMemberNames();
+
             std::array<ParseError, mp_size<D1>::value> errors;
             auto it = std::begin(errors);
             mp_for_each<D1>([&](auto D)
@@ -541,7 +543,7 @@ namespace TemplateParser
                 ParseError &currentError = *it;
                 auto &valueIntoStruct = dst.*D.pointer;
 
-                if (std::find(src.begin(), src.end(), D.name) == src.end())
+                if (std::find(srcKeys.begin(), srcKeys.end(), D.name) == srcKeys.end())
                 {
                     ++it;
                     return;

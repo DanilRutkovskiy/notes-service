@@ -33,6 +33,10 @@
         {
             "name": "boost-mp11",
             "version>=": "1.88.0"
+        },
+        {
+            "name": "libpqxx",
+            "version>=": "7.10.1"
         }
     ],
     "overrides": [
