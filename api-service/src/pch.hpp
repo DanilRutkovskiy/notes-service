@@ -9,3 +9,4 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <json/json.h>
+#include <boost/describe.hpp>

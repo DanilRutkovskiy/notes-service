@@ -177,7 +177,7 @@ namespace TemplateParser
             }
             else
             {
-                return ParseError{"Expected string or number, got " + std::string(src.typeName())};
+                return ParseError{"Expected string or number"};
             }
             return ParseError{};
         }
@@ -474,7 +474,7 @@ namespace TemplateParser
 
         //Генерация описания членов структуры dst(Можно получить имя и ссылку, а по ссылке тип)
         using D1 = describe_members<T, mod_public | mod_protected | mod_inherited>;
-        const auto srcKeys = src.keys();
+        const auto srcKeys = src.getMemberNames();
 
         std::array<ParseError, mp_size<D1>::value> errors;
         auto it = std::begin(errors);
@@ -485,12 +485,12 @@ namespace TemplateParser
             ParseError &currentError = *it;
             auto &valueIntoStruct = dst.*D.pointer;
             using TrueType = std::remove_reference_t<decltype(valueIntoStruct)>;
-            if (!srcKeys.contains(D.name))
+            if (std::find(srcKeys.begin(), srcKeys.end(), D.name) == srcKeys.end())
             {
                 //Отсутствие не опциональных членов не допустимо
                 if (!(Concepts::isOptional<TrueType>::value || TemplateParser::ParserType::isGetFromParsing<TrueType>))
                 {
-                    currentError = std::format("parameter '{}': not found", D.name.toStdString());
+                    currentError = std::format("parameter '{}': not found", D.name);
                 }
                 ++it;
             }
@@ -541,17 +541,17 @@ namespace TemplateParser
                 ParseError &currentError = *it;
                 auto &valueIntoStruct = dst.*D.pointer;
 
-                if (!src.contains(D.name))
+                if (std::find(src.begin(), src.end(), D.name) == src.end())
                 {
                     ++it;
                     return;
                 }
 
-                auto value = src.value(D.name);
+                auto value = src[D.name];
                 if (auto error = parse(std::move(value), valueIntoStruct);
                     error)
                 {
-                    currentError = std::format("parameter {}: error parsing", D.name.toStdString());
+                    currentError = std::format("parameter {}: error parsing", D.name);
                     currentError.addSubError(std::move(error));
                 }
 

@@ -25,4 +25,13 @@ private:
     redisContext* m_redis;
     std::unique_ptr<RdKafka::Producer> m_kafkaProducer;
     const std::string m_kafkaTopic = "notes-topic";
+
+    struct PostBody
+    {
+        std::string userId;
+        std::string title;
+        std::string content;
+
+        BOOST_DESCRIBE_CLASS(PostBody, (),(userId, title, content),(),());
+    };
 };

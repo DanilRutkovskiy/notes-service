@@ -28,7 +28,11 @@ NoteController::NoteController()
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
+    PostBody body;
     const auto json = req->getJsonObject();
+    auto error = TemplateParser::parse(*json, body);
+    error.unwrap();
+
     if (!json)
     {
         auto resp = drogon::HttpResponse::newHttpResponse();
