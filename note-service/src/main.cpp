@@ -14,8 +14,12 @@ int main()
     //exposer.RegisterCollectable(registry);
 
     spdlog::set_level(spdlog::level::info);
-
-    drogon::app().addListener(Config::apiServiceHost.data(), Config::apiServicePort).setThreadNum(4).run();
+    
+    drogon::app()
+    .addListener(Config::noteServiceHost.data(), Config::noteServicePort)
+    .setThreadNum(std::thread::hardware_concurrency() - 1)
+    .loadConfigFile("./drogon-config.json")
+    .run();
 
     return 0;
 }
