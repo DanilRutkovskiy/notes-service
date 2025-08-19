@@ -2,7 +2,7 @@
     "name": "note-service",
     "version-string": "1.0.0",
     "dependencies": [
-          {
+        {
             "name": "fmt",
             "version>=": "9.1.0"
         },
@@ -23,8 +23,16 @@
             "version>=": "2.10.1"
         },
         {
-            "name": "nlohmann-json",
-            "version>=": "3.12.0"
+            "name": "jsoncpp",
+            "version>=": "1.9.6"
+        },
+        {
+            "name": "boost-describe",
+            "version>=": "1.88.0"
+        },
+        {
+            "name": "boost-mp11",
+            "version>=": "1.88.0"
         }
     ],
     "overrides": [
@@ -33,5 +41,5 @@
       "version": "1.5.24"
     }
     ],
-    "builtin-baseline": "40619a55c3e76dc4005c8d1b7395071471bb8b96"
+    "builtin-baseline": "4bb07a326d9b9bce3703272a509e5bc25dd9cfd5"
 }

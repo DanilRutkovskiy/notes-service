@@ -7,5 +7,5 @@
 #include <map>
 #include <unordered_map>
 #include <algorithm>
-#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <json/json.h>

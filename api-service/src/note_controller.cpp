@@ -27,7 +27,6 @@ NoteController::NoteController()
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
-    /*
     const auto json = req->getJsonObject();
     if (!json)
     {
@@ -66,7 +65,6 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
     resp->setStatusCode(drogon::k200OK);
     resp->setBody("Note created with id: " + noteId);
     callback(resp);
-    */
 }
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
