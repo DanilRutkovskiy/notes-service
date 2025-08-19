@@ -35,4 +35,5 @@ target_link_libraries(api-service PRIVATE
     #prometheus-cpp::core
     #prometheus-cpp::pull
     spdlog::spdlog
+    TemplateParser
 )

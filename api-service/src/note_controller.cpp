@@ -2,6 +2,7 @@
 
 #include <drogon/HttpResponse.h>
 #include <config.hpp>
+#include <TemplateParser.hpp>
 
 NoteController::NoteController()
 {
