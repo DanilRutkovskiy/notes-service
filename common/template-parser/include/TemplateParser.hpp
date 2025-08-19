@@ -270,7 +270,7 @@ namespace TemplateParser
         template<typename U>
         static ParseError doParse(U &&src, std::optional<Y> &dst)
         {
-            if constexpr (requires{ Concepts::hasIsNull<U>; })
+            if constexpr (requires{ requires Concepts::hasIsNull<U>; })
             {
                 if (src.isNull())
                     return {};
