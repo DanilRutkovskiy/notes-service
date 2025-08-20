@@ -11,12 +11,12 @@
             "version>=": "7.10.1"
         },
         {
-            "name": "libpq",
-            "version>=": "16.9"
+            "name": "libpq"
         },
         {
             "name": "drogon",
-            "version>=": "1.9.10"
+            "version>=": "1.9.10",
+            "features": ["ctl", "orm", "postgres", "redis", "yaml"]
         },
         {
             "name": "spdlog",
