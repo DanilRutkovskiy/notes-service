@@ -28,10 +28,7 @@ NoteController::NoteController()
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
-    PostBody body;
     const auto json = req->getJsonObject();
-    auto error = TemplateParser::parse(*json, body);
-    error.unwrap();
 
     if (!json)
     {
@@ -42,27 +39,31 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
-    auto resp = drogon::HttpResponse::newHttpResponse();
-    
+    PostBody body;
+    auto error = TemplateParser::parse(*json, body);
+    TemplateParser::unwrapParseError(std::move(error));
+
     const auto dbClient = drogon::app().getDbClient();
 
     dbClient->execSqlAsync("INSERT INTO notes(user_id, title, content) VALUES($1, $2, $3)", 
-        [&resp, &body](const drogon::orm::Result& result)
+        [callback = std::move(callback)](const drogon::orm::Result& result)
         {
-            resp->setStatusCode(drogon::k200OK);
-            resp->setBody("Note created for user: " + body.userId);
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k201Created);
+            resp->setBody("Note created successfully");
+            callback(resp);
         },
-        [&resp](const drogon::orm::DrogonDbException& ex)
+        [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex)
         {
-            spdlog::error(ex.base().what());
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k500InternalServerError);
-            resp->setBody("Error creating note: " + *ex.base().what());
+            resp->setBody("Error creating note");
+            callback(resp);
         },
         body.userId,
         body.title,
         body.content);
-
-    callback(resp);
 }
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
