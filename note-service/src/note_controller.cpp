@@ -42,24 +42,26 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
+    auto resp = drogon::HttpResponse::newHttpResponse();
     
     const auto dbClient = drogon::app().getDbClient();
-    dbClient->execSqlAsync("INSERT INTO notes(user_id, title, content) VALUES($1, $2, $3)", 
-        [](const drogon::orm::Result& result)
-        {
 
+    dbClient->execSqlAsync("INSERT INTO notes(user_id, title, content) VALUES($1, $2, $3)", 
+        [&resp, &body](const drogon::orm::Result& result)
+        {
+            resp->setStatusCode(drogon::k200OK);
+            resp->setBody("Note created for user: " + body.userId);
         },
-        [](const drogon::orm::DrogonDbException& ex)
+        [&resp](const drogon::orm::DrogonDbException& ex)
         {
             spdlog::error(ex.base().what());
+            resp->setStatusCode(drogon::k500InternalServerError);
+            resp->setBody("Error creating note: " + *ex.base().what());
         },
         body.userId,
         body.title,
         body.content);
 
-    auto resp = drogon::HttpResponse::newHttpResponse();
-    resp->setStatusCode(drogon::k200OK);
-    resp->setBody("Note created for user: " + body.userId);
     callback(resp);
 }
 
