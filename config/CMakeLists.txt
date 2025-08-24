@@ -5,7 +5,7 @@ configure_file(
 )
 
 configure_file(
-    "drogon-config.json.in"
-    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/drogon-config.json"
+    "note-service-drogon-db-config.json.in"
+    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/note-service-drogon-db-config.json"
     @ONLY
 )

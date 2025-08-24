@@ -17,7 +17,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: notes-db
     ports:
-      - "5433:5432"
+      - "60001:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:

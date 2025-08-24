@@ -18,7 +18,7 @@ int main()
     drogon::app()
     .addListener(Config::noteServiceHost.data(), Config::noteServicePort)
     .setThreadNum(std::thread::hardware_concurrency() - 1)
-    .loadConfigFile("./drogon-config.json")
+    .loadConfigFile("./note-service-drogon-db-config.json")
     .run();
 
     return 0;

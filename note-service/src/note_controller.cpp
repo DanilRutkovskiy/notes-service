@@ -42,20 +42,20 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
-    //redisCommand(m_redis, "HMSET note:%s user_id %s title %s content %s", noteId, userId, title, content);
-
-    Json::Value kafkaMessage;
-    kafkaMessage["user_id"] = body.userId;
-    kafkaMessage["title"] = body.title;
-    kafkaMessage["content"] = body.content;
-    kafkaMessage["action"] = "create";
     
-    Json::StreamWriterBuilder writer;
-    std::string message = Json::writeString(writer, kafkaMessage);
-    m_kafkaProducer->produce(m_kafkaTopic, RdKafka::Topic::PARTITION_UA, RdKafka::Producer::RK_MSG_COPY,
-                             const_cast<char*>(message.c_str()), message.size(), nullptr, 0, currentTimestamp(), nullptr);
+    const auto dbClient = drogon::app().getDbClient();
+    dbClient->execSqlAsync("INSERT INTO notes(user_id, title, content) VALUES($1, $2, $3)", 
+        [](const drogon::orm::Result& result)
+        {
 
-    m_kafkaProducer->poll(0);
+        },
+        [](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error(ex.base().what());
+        },
+        body.userId,
+        body.title,
+        body.content);
 
     auto resp = drogon::HttpResponse::newHttpResponse();
     resp->setStatusCode(drogon::k200OK);

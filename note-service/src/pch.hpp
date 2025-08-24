@@ -10,3 +10,5 @@
 #include <spdlog/spdlog.h>
 #include <json/json.h>
 #include <boost/describe.hpp>
+#include <drogon/orm/DbClient.h>
+#include <drogon/orm/Exception.h>

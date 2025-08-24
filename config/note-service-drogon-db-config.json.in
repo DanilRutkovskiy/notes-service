@@ -6,8 +6,8 @@
       "host": "@NOTE_SERVICE_DB_HOST@",
       "port": @NOTE_SERVICE_DB_PORT@,
       "dbname": "@NOTE_SERVICE_DB_NAME@",
-      "user": "postgres",
-      "password": "secret",
+      "user": "@NOTE_SERVICE_DB_USER@",
+      "password": "@NOTE_SERVICE_DB_PASSWORD@",
       "is_fast": false,
       "number_of_connections": 5
     }
