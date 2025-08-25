@@ -41,7 +41,14 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 
     PostBody body;
     auto error = TemplateParser::parse(*json, body);
-    TemplateParser::unwrapParseError(std::move(error));
+    if(error)
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->setBody(error.fullWhat());
+        callback(resp);
+        return;
+    }
 
     const auto dbClient = drogon::app().getDbClient();
 
@@ -68,29 +75,33 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
 {
-    /*
-    redisReply* reply = static_cast<redisReply*>(redisCommand(m_redis, "HGETALL note:%s", noteId.c_str()));
-    if (reply == nullptr || reply->elements == 0)
-    {
-        auto resp = drogon::HttpResponse::newHttpResponse();
-        resp->setStatusCode(drogon::k404NotFound);
-        resp->setBody("Note not found");
-        callback(resp);
-    }
+    const auto dbClient = drogon::app().getDbClient();
+    dbClient->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
+        [callback = std::move(callback)](const drogon::orm::Result& result)
+        {
+            Json::Value json;
+            if(result.empty())
+            {
+                return;
+            }
 
-    Json::Value note;
-    for (size_t i = 0; i < reply->elements; i += 2)
-    {
-        const std::string key = reply->element[i]->str;
-        const std::string value = reply->element[i + 1]->str;
-        note[key] = value;
-    }
-    freeReplyObject(reply);
-
-    Json::StreamWriterBuilder writer;
-    const auto resp = drogon::HttpResponse::newHttpJsonResponse(note);
-    callback(resp);
-    */
+            const auto& record = result[0];
+            PostBody note;
+            note.content = record["content"].as<std::string>();
+            note.title = record["title"].as<std::string>();
+            note.userId = record["user_id"].as<std::string>();
+            json = TemplateParser::toJson(note);
+        },
+        [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k500InternalServerError);
+            resp->setBody("Error creating note");
+            callback(resp);
+        },
+        noteId
+    );
 }
 
 int64_t NoteController::currentTimestamp() const
