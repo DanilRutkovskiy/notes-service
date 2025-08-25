@@ -70,27 +70,30 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         },
         body.userId,
         body.title,
-        body.content);
+        body.content
+    
+    );
 }
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
 {
     const auto dbClient = drogon::app().getDbClient();
     dbClient->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
-        [callback = std::move(callback)](const drogon::orm::Result& result)
+        [callback = std::move(callback), noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
             if(result.empty())
             {
-                return;
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k404NotFound);
+                resp->setBody(std::format("Can not find a note with id = {}", noteId));
+                callback(resp);
             }
 
             const auto& record = result[0];
-            PostBody note;
-            note.content = record["content"].as<std::string>();
-            note.title = record["title"].as<std::string>();
-            note.userId = record["user_id"].as<std::string>();
-            json = TemplateParser::toJson(note);
+            json = TemplateParser::toJson(PostBody::fromSqlRecord(record));
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(json));
+            callback(resp);
         },
         [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex)
         {

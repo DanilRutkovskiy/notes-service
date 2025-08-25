@@ -32,6 +32,17 @@ private:
         std::string title;
         std::string content;
 
+
+        static PostBody fromSqlRecord(const drogon::orm::Row& row)
+        {
+            PostBody result;
+            result.content = row["content"].as<std::string>();
+            result.title = row["title"].as<std::string>();
+            result.userId = row["user_id"].as<std::string>();
+
+            return result;
+        }
+
         BOOST_DESCRIBE_CLASS(PostBody, (),(userId, title, content),(),());
     };
 };
