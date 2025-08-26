@@ -173,6 +173,31 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
         std::move(noteId));
 }
 
+void NoteController::deleteNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string &&noteId)
+{
+    const auto dbClient = drogon::app().getDbClient();
+    const auto json = req->getJsonObject();
+
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
+
+    dbClient->execSqlAsync("DELETE FROM notes WHERE id = $1", 
+    [cb, noteId](const drogon::orm::Result& result)
+        {
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k200OK);
+            (*cb)(resp);
+        }, 
+        [cb](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k500InternalServerError);
+            resp->setBody("Error updating note");
+            (*cb)(resp);
+        }, 
+        std::move(noteId));
+}
+
 int64_t NoteController::currentTimestamp() const
 {
     using namespace std::chrono;
