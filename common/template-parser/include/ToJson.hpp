@@ -7,7 +7,6 @@ namespace TemplateParser
     template<typename T>
     struct ToJsonImpl;
 
-
     template<typename T>
     inline Json::Value toJson(T &&src)
     {
@@ -60,7 +59,9 @@ namespace TemplateParser
         {
             Json::Value array;
             for (const auto& element : src)
+            {
                 array.append(toJson(element));
+            }
 
             return array;
         }

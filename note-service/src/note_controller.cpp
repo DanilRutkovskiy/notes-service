@@ -23,7 +23,6 @@ NoteController::NoteController()
         spdlog::error("Kafka producer creation failed: {}", err);
         throw std::runtime_error("Kafka producer creation failed");
     }
-    
 }
 
 void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
@@ -50,36 +49,41 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
+
     const auto dbClient = drogon::app().getDbClient();
 
-    dbClient->execSqlAsync("INSERT INTO notes(user_id, title, content) VALUES($1, $2, $3)", 
-        [callback = std::move(callback)](const drogon::orm::Result& result)
+    dbClient->execSqlAsync("INSERT INTO notes(id, user_id, title, content) VALUES($1, $2, $3, $4) "
+                           "RETURNING id", 
+        [cb](const drogon::orm::Result& result)
         {
-            auto resp = drogon::HttpResponse::newHttpResponse();
+            Json::Value json;
+            json["id"] = result[0]["id"].as<std::string>();
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(json));
             resp->setStatusCode(drogon::k201Created);
-            resp->setBody("Note created successfully");
-            callback(resp);
+            (*cb)(resp);
         },
-        [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex)
+        [cb](const drogon::orm::DrogonDbException& ex)
         {
             spdlog::error("Database error: {}", ex.base().what());
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k500InternalServerError);
             resp->setBody("Error creating note");
-            callback(resp);
+            (*cb)(resp);
         },
+        drogon::utils::getUuid(),
         body.userId,
         body.title,
         body.content
-    
     );
 }
 
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
 {
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
     const auto dbClient = drogon::app().getDbClient();
     dbClient->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
-        [callback = std::move(callback), noteId](const drogon::orm::Result& result)
+        [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
             if(result.empty())
@@ -87,21 +91,21 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
                 auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k404NotFound);
                 resp->setBody(std::format("Can not find a note with id = {}", noteId));
-                callback(resp);
+                (*cb)(resp);
             }
 
             const auto& record = result[0];
             json = TemplateParser::toJson(PostBody::fromSqlRecord(record));
             auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(json));
-            callback(resp);
+            (*cb)(resp);
         },
-        [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex)
+        [cb](const drogon::orm::DrogonDbException& ex)
         {
             spdlog::error("Database error: {}", ex.base().what());
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k500InternalServerError);
             resp->setBody("Error creating note");
-            callback(resp);
+            (*cb)(resp);
         },
         noteId
     );

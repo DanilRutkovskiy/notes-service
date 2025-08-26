@@ -7,7 +7,7 @@
       "request": "launch",
       "program": "${workspaceFolder}/build/bin/note-service",
       "args": [],
-      "stopAtEntry": true,
+      "stopAtEntry": false,
       "cwd": "${workspaceFolder}/build/bin",
       "environment": [],
       "externalConsole": false,
