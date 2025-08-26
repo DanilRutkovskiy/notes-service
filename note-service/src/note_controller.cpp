@@ -78,7 +78,7 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
     );
 }
 
-void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
+void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string&& noteId)
 {
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
     const auto dbClient = drogon::app().getDbClient();
@@ -112,12 +112,11 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
     );
 }
 
-void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
+void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string&& noteId)
 {
     const auto dbClient = drogon::app().getDbClient();
     const auto json = req->getJsonObject();
     
-    std::vector<std::string> params;
     std::string sql = "UPDATE notes SET ";
     std::string value;
 
@@ -142,11 +141,12 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
         value = (*json)["content"].as<std::string>();
     }
 
-    sql += " WHERE id = $2 ";
-    params.push_back(noteId);
+    sql += " WHERE id = $2 RETURNING id";
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
-    auto successLambda = [cb, noteId](const drogon::orm::Result& result)
+
+    dbClient->execSqlAsync(std::move(sql), 
+    [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
             if(result.empty())
@@ -160,18 +160,17 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k200OK);
             (*cb)(resp);
-        };
-
-    auto errorLambda = [cb](const drogon::orm::DrogonDbException& ex)
+        }, 
+        [cb](const drogon::orm::DrogonDbException& ex)
         {
             spdlog::error("Database error: {}", ex.base().what());
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k500InternalServerError);
             resp->setBody("Error updating note");
             (*cb)(resp);
-        };
-
-    dbClient->execSqlAsync(std::move(sql), std::move(successLambda), std::move(errorLambda), std::move(value), std::move(noteId));
+        }, 
+        std::move(value), 
+        std::move(noteId));
 }
 
 int64_t NoteController::currentTimestamp() const

@@ -17,8 +17,8 @@ public:
     METHOD_LIST_END
 
     void createNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string noteId);
-    void updateNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string noteId);
+    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string&& noteId);
+    void updateNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string&& noteId);
 
 private:
     int64_t currentTimestamp() const;
