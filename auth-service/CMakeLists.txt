@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(note-service VERSION 1.0.0 LANGUAGES CXX)
+project(auth-service VERSION 1.0.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -11,18 +11,18 @@ find_package(RdKafka CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(libpqxx CONFIG REQUIRED)
 
-set(NOTE_SERVICE_SOURCE
+set(AUTH_SERVICE_SOURCE
     "src/main.cpp" 
-    "src/note_controller.cpp"
+    "src/auth_controller.cpp"
 )
 
-add_executable(note-service ${NOTE_SERVICE_SOURCE})
+add_executable(auth-service ${AUTH_SERVICE_SOURCE})
 
 target_precompile_headers(note-service PRIVATE
     "include/pch.hpp"
 )
 
-target_include_directories(note-service PRIVATE 
+target_include_directories(auth-service PRIVATE 
     "include"
     "${CMAKE_BINARY_DIR}/configured_files/include"
 )

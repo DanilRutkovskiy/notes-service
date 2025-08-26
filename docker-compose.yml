@@ -10,7 +10,7 @@ services:
     networks:
       - notes-network
 
-  postgres:
+  postgres_note_service:
     image: postgres:17
     environment:
       POSTGRES_USER: user
@@ -19,7 +19,7 @@ services:
     ports:
       - "60001:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres-note-service-data:/var/lib/postgresql/data
     networks:
       - notes-network
 
@@ -77,13 +77,13 @@ services:
     networks:
       - notes-network
   
-  liquibase:
+  liquibase_notes_service:
     image: liquibase/liquibase:4.27.0
     volumes: 
       - ./note-service/migrations:/liquibase/changelog
     command: >
       sh -c "sleep 5 && liquibase
-      --url=jdbc:postgresql://postgres:5432/notes-db
+      --url=jdbc:postgresql://postgres_note_service:5432/notes-db
       --username=user
       --password=password
       --driver=org.postgresql.Driver
@@ -91,7 +91,38 @@ services:
       --changeLogFile=changelog/db/db.changelog-master.xml
       update"
     depends_on:
-      - postgres
+      - postgres_note_service
+    networks:
+      - notes-network
+
+  postgres_auth_service:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: auth-db
+    ports:
+      - "60002:5432"
+    volumes:
+      - postgres-auth-service-data:/var/lib/postgresql/data
+    networks:
+      - notes-network
+
+  liquibase_auth_service:
+    image: liquibase/liquibase:4.27.0
+    volumes: 
+      - ./auth-service/migrations:/liquibase/changelog
+    command: >
+      sh -c "sleep 5 && liquibase
+      --url=jdbc:postgresql://postgres_auth_service:5432/auth-db
+      --username=user
+      --password=password
+      --driver=org.postgresql.Driver
+      --classpath=/liquibase/changelog/postgresql-42.7.3.jar
+      --changeLogFile=changelog/db/db.changelog-master.xml
+      update"
+    depends_on:
+      - postgres_auth_service
     networks:
       - notes-network
 
@@ -101,5 +132,6 @@ networks:
 
 volumes:
   redis-data:
-  postgres-data:
+  postgres-note-service-data:
+  postgres-auth-service-data:
   clickhouse-data:
