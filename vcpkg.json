@@ -41,6 +41,14 @@
         {
             "name": "boost-mp11",
             "version>=": "1.88.0"
+        },
+        {
+            "name": "jwt-cpp",
+            "version>=": "0.7.1"
+        },
+        {
+            "name": "openssl",
+            "version>=": "3.5.2"
         }
     ],
     "overrides": [
