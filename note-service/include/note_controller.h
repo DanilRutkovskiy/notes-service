@@ -11,12 +11,14 @@ public:
     NoteController();
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(NoteController::createNote, "/notes/create", drogon::Post);
-    ADD_METHOD_TO(NoteController::readNote, "/notes/read/{id}", drogon::Get);
+    ADD_METHOD_TO(NoteController::createNote, "/notes", drogon::Post);
+    ADD_METHOD_TO(NoteController::readNote, "/notes/{id}", drogon::Get);
+    ADD_METHOD_TO(NoteController::updateNote, "/notes/{id}", drogon::Patch);
     METHOD_LIST_END
 
     void createNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string id);
+    void readNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string noteId);
+    void updateNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback, std::string noteId);
 
 private:
     int64_t currentTimestamp() const;

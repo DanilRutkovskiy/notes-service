@@ -35,6 +35,7 @@ target_link_libraries(note-service PRIVATE
     JsonCpp::JsonCpp
     spdlog::spdlog
     TemplateParser
+    Utils
     pqxx
     #prometheus-cpp::core
     #prometheus-cpp::pull

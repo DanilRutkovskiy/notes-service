@@ -97,6 +97,7 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
             const auto& record = result[0];
             json = TemplateParser::toJson(PostBody::fromSqlRecord(record));
             auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(json));
+            resp->setStatusCode(drogon::k200OK);
             (*cb)(resp);
         },
         [cb](const drogon::orm::DrogonDbException& ex)
@@ -107,8 +108,70 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
             resp->setBody("Error creating note");
             (*cb)(resp);
         },
-        noteId
+        std::move(noteId)
     );
+}
+
+void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string noteId)
+{
+    const auto dbClient = drogon::app().getDbClient();
+    const auto json = req->getJsonObject();
+    
+    std::vector<std::string> params;
+    std::string sql = "UPDATE notes SET ";
+    std::string value;
+
+    if (json->getMemberNames().size() > 1)
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->setBody("Can not update more than one parameter at a time");
+        callback(resp);
+        return;
+    }
+
+    if(json->isMember("title"))
+    {
+        sql += " title = $1 ";
+        value = (*json)["title"].as<std::string>();
+    }
+
+    if(json->isMember("content"))
+    {
+        sql += " content = $1 ";
+        value = (*json)["content"].as<std::string>();
+    }
+
+    sql += " WHERE id = $2 ";
+    params.push_back(noteId);
+
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
+    auto successLambda = [cb, noteId](const drogon::orm::Result& result)
+        {
+            Json::Value json;
+            if(result.empty())
+            {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k404NotFound);
+                resp->setBody(std::format("Can not find a note with id = {}", noteId));
+                (*cb)(resp);
+                return;
+            }
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k200OK);
+            (*cb)(resp);
+        };
+
+    auto errorLambda = [cb](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setStatusCode(drogon::k500InternalServerError);
+            resp->setBody("Error updating note");
+            (*cb)(resp);
+        };
+
+    dbClient->execSqlAsync(std::move(sql), std::move(successLambda), std::move(errorLambda), std::move(value), std::move(noteId));
 }
 
 int64_t NoteController::currentTimestamp() const

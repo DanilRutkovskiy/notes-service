@@ -1,0 +1,16 @@
+add_library(Utils INTERFACE)
+
+target_include_directories(Utils INTERFACE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${CMAKE_BINARY_DIR}/configured_files/include"
+)
+
+find_package(Drogon CONFIG REQUIRED)
+find_package(jsoncpp CONFIG REQUIRED)
+
+target_link_libraries(TemplateParser INTERFACE 
+    JsonCpp::JsonCpp
+    Drogon::Drogon
+)
+
+target_compile_features(TemplateParser INTERFACE cxx_std_20)
