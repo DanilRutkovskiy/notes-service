@@ -1,30 +1,26 @@
 #include "auth_controller.hpp"
 #include <TemplateParser.hpp>
+#include <Utils.hpp>
 
 void AuthController::registerUser(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
     Json::Value json = *req->getJsonObject();
     User user;
     auto error = TemplateParser::parse(json, user);
-    if (error) {
-        Json::Value respJson;
-        respJson["status"] = "error";
-        respJson["message"] = error.fullWhat();
-        auto resp = drogon::HttpResponse::newHttpJsonResponse(respJson);
+    if (error) 
+    {
+        Json::Value respJson = error.fullWhat();
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(respJson));
         resp->setStatusCode(drogon::k400BadRequest);
-        callback(resp);
+        callback(std::move(resp));
         return;
     }
 
-    uuid_t uuid;
-    uuid_generate_random(uuid);
-    char uuid_str[37];
-    uuid_unparse(uuid, uuid_str);
-    std::string userId = uuid_str;
-    //std::string passwordHash = bcrypt::generateHash(user.password);
+    auto userId = drogon::utils::getUuid();
+    std::string passwordHash = Utils::hashPassword(user.password);
 
-    auto dbClient = drogon::app().getDbClient();
-    dbClient->execSqlAsync(
+    auto transaction = drogon::app().getDbClient()->newTransaction();
+    transaction->execSqlAsync(
         "INSERT INTO users (id, email, password_hash, role, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
         [callback = std::move(callback)](const drogon::orm::Result& result) {
             Json::Value json;

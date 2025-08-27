@@ -11,10 +11,10 @@ public:
     NoteController();
 public:
     METHOD_LIST_BEGIN
-    ADD_METHOD_TO(NoteController::createNote, "/notes", drogon::Post);
-    ADD_METHOD_TO(NoteController::readNote, "/notes/{id}", drogon::Get);
-    ADD_METHOD_TO(NoteController::updateNote, "/notes/{id}", drogon::Patch);
-    ADD_METHOD_TO(NoteController::deleteNote, "/notes/{id}", drogon::Delete);
+        ADD_METHOD_TO(NoteController::createNote, "/notes", drogon::Post);
+        ADD_METHOD_TO(NoteController::readNote, "/notes/{id}", drogon::Get);
+        ADD_METHOD_TO(NoteController::updateNote, "/notes/{id}", drogon::Patch);
+        ADD_METHOD_TO(NoteController::deleteNote, "/notes/{id}", drogon::Delete);
     METHOD_LIST_END
 
     void createNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);

@@ -49,6 +49,10 @@
         {
             "name": "openssl",
             "version>=": "3.5.2"
+        },
+        {
+            "name": "argon2", 
+            "version>=": "20190702#1"
         }
     ],
     "overrides": [

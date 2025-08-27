@@ -10,6 +10,7 @@ find_package(hiredis CONFIG REQUIRED)
 find_package(RdKafka CONFIG REQUIRED)
 find_package(jsoncpp CONFIG REQUIRED)
 find_package(libpqxx CONFIG REQUIRED)
+find_package(unofficial-argon2 CONFIG REQUIRED)
 
 set(AUTH_SERVICE_SOURCE
     "src/main.cpp" 
@@ -37,4 +38,5 @@ target_link_libraries(auth-service PRIVATE
     TemplateParser
     Utils
     pqxx
+    unofficial::argon2::libargon2
 )
