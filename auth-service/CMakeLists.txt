@@ -18,7 +18,7 @@ set(AUTH_SERVICE_SOURCE
 
 add_executable(auth-service ${AUTH_SERVICE_SOURCE})
 
-target_precompile_headers(note-service PRIVATE
+target_precompile_headers(auth-service PRIVATE
     "include/pch.hpp"
 )
 
@@ -27,7 +27,7 @@ target_include_directories(auth-service PRIVATE
     "${CMAKE_BINARY_DIR}/configured_files/include"
 )
 
-target_link_libraries(note-service PRIVATE 
+target_link_libraries(auth-service PRIVATE 
     Drogon::Drogon
     hiredis::hiredis
     RdKafka::rdkafka

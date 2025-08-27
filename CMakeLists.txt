@@ -29,8 +29,14 @@ option(USE_VCPKG "Whether to use VCPKG" ON)
     set(NOTE_SERVICE_DB_NAME "notes-db")
     set(NOTE_SERVICE_DB_USER "user")
     set(NOTE_SERVICE_DB_PASSWORD "password")
-    set(DROGON_CTL_EXECUTABLE "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-linux/tools/drogon/drogon_ctl")
-
+    ##auth-service
+    set(AUTH_SERVICE_HOST "0.0.0.0")
+    set(AUTH_SERVICE_PORT "8081")
+    set(AUTH_SERVICE_DB_HOST "0.0.0.0")
+    set(AUTH_SERVICE_DB_PORT "60002")
+    set(AUTH_SERVICE_DB_NAME "auth-db")
+    set(AUTH_SERVICE_DB_USER "user")
+    set(AUTH_SERVICE_DB_PASSWORD "password")
 
 if(USE_VCPKG)
     message(STATUS "Using VCPKG")
@@ -38,5 +44,6 @@ if(USE_VCPKG)
 endif()
 
 add_subdirectory(note-service)
+add_subdirectory(auth-service)
 add_subdirectory(config)
 add_subdirectory(common)

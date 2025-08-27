@@ -1,0 +1,15 @@
+{
+  "db_clients": [
+    {
+      "name": "default",
+      "rdbms": "postgresql",
+      "host": "@AUTH_SERVICE_DB_HOST@",
+      "port": @AUTH_SERVICE_DB_PORT@,
+      "dbname": "@AUTH_SERVICE_DB_NAME@",
+      "user": "@AUTH_SERVICE_DB_USER@",
+      "password": "@AUTH_SERVICE_DB_PASSWORD@",
+      "is_fast": false,
+      "number_of_connections": 5
+    }
+  ]
+}

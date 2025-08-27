@@ -51,9 +51,9 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
-    const auto dbClient = drogon::app().getDbClient();
+    const auto transaction = drogon::app().getDbClient()->newTransaction();
 
-    dbClient->execSqlAsync("INSERT INTO notes(id, user_id, title, content) VALUES($1, $2, $3, $4) "
+    transaction->execSqlAsync("INSERT INTO notes(id, user_id, title, content) VALUES($1, $2, $3, $4) "
                            "RETURNING id", 
         [cb](const drogon::orm::Result& result)
         {
@@ -81,8 +81,8 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string&& noteId)
 {
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
-    const auto dbClient = drogon::app().getDbClient();
-    dbClient->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
+    const auto transaction = drogon::app().getDbClient()->newTransaction();
+    transaction->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
         [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
@@ -114,7 +114,7 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
 
 void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string&& noteId)
 {
-    const auto dbClient = drogon::app().getDbClient();
+    const auto transaction = drogon::app().getDbClient()->newTransaction();
     const auto json = req->getJsonObject();
     
     std::string sql = "UPDATE notes SET ";
@@ -145,7 +145,7 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
-    dbClient->execSqlAsync(std::move(sql), 
+    transaction->execSqlAsync(std::move(sql), 
     [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
@@ -175,12 +175,12 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
 
 void NoteController::deleteNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string &&noteId)
 {
-    const auto dbClient = drogon::app().getDbClient();
+    const auto transaction = drogon::app().getDbClient()->newTransaction();
     const auto json = req->getJsonObject();
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
-    dbClient->execSqlAsync("DELETE FROM notes WHERE id = $1", 
+    transaction->execSqlAsync("DELETE FROM notes WHERE id = $1", 
     [cb, noteId](const drogon::orm::Result& result)
         {
             auto resp = drogon::HttpResponse::newHttpResponse();
