@@ -18,8 +18,11 @@ public:
 public:
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(AuthController::createUser, "/users", drogon::Post);
+        ADD_METHOD_TO(AuthController::loginUser, "/users/login", drogon::Post);
     METHOD_LIST_END
+
     void createUser(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void loginUser(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
 private:
     redisContext* m_redis;

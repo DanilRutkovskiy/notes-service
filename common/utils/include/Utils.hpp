@@ -4,6 +4,8 @@
 #include <random>
 #include <regex>
 #include <drogon/HttpController.h>
+#include <jwt-cpp/jwt.h>
+#include <jwt-cpp/traits/kazuho-picojson/traits.h>
 
 namespace Utils
 {
@@ -58,6 +60,39 @@ namespace Utils
         return std::regex_match(email, emailRegex);
     }
     
+    inline std::string generateJwt(const std::string &userId, const std::string &secret = "super_secret_key")
+    {
+         auto token = jwt::create<jwt::traits::kazuho_picojson>()
+            .set_type("JWT")
+            .set_issuer("auth-service")
+            .set_subject(userId)
+            .set_issued_at(std::chrono::system_clock::now())
+            .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(1))
+            .sign(jwt::algorithm::hs256{secret});
+
+        return token;
+    }
+
+    inline bool verifyJwt(const std::string &token, const std::string &secret = "super_secret_key")
+    {
+        try
+        {
+            auto decoded = jwt::decode<jwt::traits::kazuho_picojson>(token);
+
+            auto verifier = jwt::verify<jwt::traits::kazuho_picojson>()
+                .allow_algorithm(jwt::algorithm::hs256{secret})
+                .with_issuer("auth-service");
+
+            verifier.verify(decoded);
+            return true;
+        }
+        catch (const std::exception &e)
+        {
+            spdlog::warn("JWT verification failed: {}", e.what());
+            return false;
+        }
+    }
+
     class ExceptionCatcher : public drogon::HttpFilterBase
     {
     public:

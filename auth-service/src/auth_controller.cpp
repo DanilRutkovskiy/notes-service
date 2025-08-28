@@ -75,3 +75,59 @@ void AuthController::createUser(const drogon::HttpRequestPtr &req, std::function
         userId, user.email, passwordHash, user.role, true
     );
 }
+
+void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
+{
+    const auto body = req->getJsonObject();
+    auto email = body->as<std::string>();
+    auto password = body->as<std::string>();
+
+    if (!Utils::isValidEmail(email))
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->setBody("Not a valid email");
+        callback(std::move(resp));
+        return;
+    }
+
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr &)>>(std::move(callback));
+    auto transaction = drogon::app().getDbClient()->newTransaction();
+
+    transaction->execSqlAsync
+    (
+        "SELECT id, password_hash FROM users WHERE email = $1",
+        [cb, password = std::move(password)](const drogon::orm::Result& result)
+        {
+            if (result.empty())
+            {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k404NotFound);
+                resp->setBody("User does not exists");
+                (*cb)(resp);
+                return;
+            }
+
+            auto passwordHash = result[0]["password_hash"].as<std::string>();
+            if (!Utils::verifyPassword(passwordHash, password))
+            {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k401Unauthorized);
+                resp->setBody("Wrong password");
+                (*cb)(resp);
+                return;
+            }
+
+            std::string token = Utils::generateJwt(result[0]["id"].as<std::string>());
+
+            Json::Value respJson;
+            respJson["token"] = token;
+
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(respJson);
+            resp->setStatusCode(drogon::k200OK);
+            (*cb)(resp);
+        },
+        [cb](){},
+        std::move(email)
+    );
+}
