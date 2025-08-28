@@ -73,7 +73,8 @@ namespace Utils
         return token;
     }
 
-    inline bool verifyJwt(const std::string &token, const std::string &secret = "super_secret_key")
+    inline std::optional<jwt::decoded_jwt<jwt::traits::kazuho_picojson>> verifyJwt(const std::string &token, 
+                                                                                   const std::string &secret = "super_secret_key")
     {
         try
         {
@@ -84,51 +85,12 @@ namespace Utils
                 .with_issuer("auth-service");
 
             verifier.verify(decoded);
-            return true;
+            return decoded;
         }
         catch (const std::exception &e)
         {
             spdlog::warn("JWT verification failed: {}", e.what());
-            return false;
+            return std::nullopt;
         }
     }
-
-    class ExceptionCatcher : public drogon::HttpFilterBase
-    {
-    public:
-        static constexpr bool isAutoCreation = false;
-
-        void doFilter(const drogon::HttpRequestPtr& req, drogon::FilterCallback &&fcb, drogon::FilterChainCallback &&fccb) override 
-        {
-            try 
-            {
-                fccb();
-            }
-            catch (const drogon::orm::DrogonDbException& ex)
-            {
-                spdlog::error("Database exception: {}", ex.base().what());
-                auto resp = drogon::HttpResponse::newHttpResponse();
-                resp->setBody(std::format("Database exception: {}", *ex.base().what()));
-                resp->setStatusCode(drogon::k500InternalServerError);
-                fcb(resp);
-            }
-            catch (const std::exception &ex)
-            {
-                spdlog::error("Common exception: {}", ex.what());
-                auto resp = drogon::HttpResponse::newHttpResponse();
-                resp->setStatusCode(drogon::k500InternalServerError);
-                resp->setBody(std::format("Common exception: {}", ex.what()));
-                fcb(resp);
-            } 
-            catch (...) 
-            {
-                spdlog::error("Unknown exception");
-                auto resp = drogon::HttpResponse::newHttpResponse();
-                resp->setStatusCode(drogon::k500InternalServerError);
-                resp->setBody("Unknown exception");
-                fcb(resp);
-            }
-        }
-    };
-    
 }

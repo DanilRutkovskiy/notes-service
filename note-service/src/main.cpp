@@ -1,6 +1,7 @@
 #include <drogon/drogon.h>
 #include <config.hpp>
 #include <Utils.hpp>
+#include <JwtAuthFilter.hpp>
 //#include <prometheus/exposer.h>
 //#include <prometheus/registry.h>
 //#include <prometheus/counter.h>
@@ -16,7 +17,6 @@ int main()
     spdlog::set_level(spdlog::level::info);
 
     drogon::app()
-        .registerFilter(std::make_shared<Utils::ExceptionCatcher>())
         .addListener(Config::noteServiceHost.data(), Config::noteServicePort)
         .setThreadNum(std::thread::hardware_concurrency() - 1)
         .loadConfigFile("./note-service-drogon-db-config.json")
