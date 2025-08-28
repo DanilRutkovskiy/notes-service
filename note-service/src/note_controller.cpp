@@ -53,8 +53,10 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
 
     const auto transaction = drogon::app().getDbClient()->newTransaction();
 
-    transaction->execSqlAsync("INSERT INTO notes(id, user_id, title, content) VALUES($1, $2, $3, $4) "
-                           "RETURNING id", 
+    transaction->execSqlAsync
+    (
+        "INSERT INTO notes(id, user_id, title, content) VALUES($1, $2, $3, $4) "
+        "RETURNING id", 
         [cb](const drogon::orm::Result& result)
         {
             Json::Value json;
@@ -82,7 +84,9 @@ void NoteController::readNote(const drogon::HttpRequestPtr &req, std::function<v
 {
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
     const auto transaction = drogon::app().getDbClient()->newTransaction();
-    transaction->execSqlAsync("SELECT user_id, title, content FROM notes WHERE id = $1",
+    transaction->execSqlAsync
+    (
+        "SELECT user_id, title, content FROM notes WHERE id = $1",
         [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
@@ -145,8 +149,10 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
-    transaction->execSqlAsync(std::move(sql), 
-    [cb, noteId](const drogon::orm::Result& result)
+    transaction->execSqlAsync
+    (
+        std::move(sql), 
+        [cb, noteId](const drogon::orm::Result& result)
         {
             Json::Value json;
             if(result.empty())
@@ -170,7 +176,8 @@ void NoteController::updateNote(const drogon::HttpRequestPtr &req, std::function
             (*cb)(resp);
         }, 
         std::move(value), 
-        std::move(noteId));
+        std::move(noteId)
+    );
 }
 
 void NoteController::deleteNote(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback, std::string &&noteId)
@@ -180,8 +187,10 @@ void NoteController::deleteNote(const drogon::HttpRequestPtr &req, std::function
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
-    transaction->execSqlAsync("DELETE FROM notes WHERE id = $1", 
-    [cb, noteId](const drogon::orm::Result& result)
+    transaction->execSqlAsync
+    (
+        "DELETE FROM notes WHERE id = $1", 
+        [cb, noteId](const drogon::orm::Result& result)
         {
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setStatusCode(drogon::k200OK);
@@ -195,7 +204,8 @@ void NoteController::deleteNote(const drogon::HttpRequestPtr &req, std::function
             resp->setBody("Error updating note");
             (*cb)(resp);
         }, 
-        std::move(noteId));
+        std::move(noteId)
+    );
 }
 
 int64_t NoteController::currentTimestamp() const

@@ -56,20 +56,30 @@ namespace Utils
         {
             try 
             {
-                fccb(); // go to the next filter/handler
-            } 
-            catch (const std::exception &e) 
+                fccb();
+            }
+            catch (const drogon::orm::DrogonDbException& ex)
             {
+                spdlog::error("Database exception: {}", ex.base().what());
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setBody(std::format("Database exception: {}", *ex.base().what()));
+                resp->setStatusCode(drogon::k500InternalServerError);
+                fcb(resp);
+            }
+            catch (const std::exception &ex)
+            {
+                spdlog::error("Common exception: {}", ex.what());
                 auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k500InternalServerError);
-                resp->setBody(std::string("std::exception: ") + e.what());
+                resp->setBody(std::format("Common exception: {}", ex.what()));
                 fcb(resp);
             } 
             catch (...) 
             {
+                spdlog::error("Unknown exception");
                 auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k500InternalServerError);
-                resp->setBody("Unknown exception caught");
+                resp->setBody("Unknown exception");
                 fcb(resp);
             }
         }
