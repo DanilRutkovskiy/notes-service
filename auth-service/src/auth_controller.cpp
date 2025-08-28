@@ -79,8 +79,8 @@ void AuthController::createUser(const drogon::HttpRequestPtr &req, std::function
 void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
     const auto body = req->getJsonObject();
-    auto email = body->as<std::string>();
-    auto password = body->as<std::string>();
+    auto email = (*body)["email"].as<std::string>();
+    auto password = (*body)["password"].as<std::string>();
 
     if (!Utils::isValidEmail(email))
     {
@@ -127,7 +127,14 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
             resp->setStatusCode(drogon::k200OK);
             (*cb)(resp);
         },
-        [cb](){},
+        [cb](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setBody("Error registering user");
+            resp->setStatusCode(drogon::k500InternalServerError);
+            (*cb)(resp);
+        },
         std::move(email)
     );
 }

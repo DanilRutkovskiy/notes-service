@@ -17,7 +17,7 @@ public:
     AuthController();
 public:
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(AuthController::createUser, "/users", drogon::Post, "JwtAuthFilter");
+        ADD_METHOD_TO(AuthController::createUser, "/users", drogon::Post);
         ADD_METHOD_TO(AuthController::loginUser, "/users/login", drogon::Post);
     METHOD_LIST_END
 
