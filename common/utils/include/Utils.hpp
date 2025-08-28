@@ -2,6 +2,7 @@
 #include <argon2.h>
 #include <vector>
 #include <random>
+#include <regex>
 #include <drogon/HttpController.h>
 
 namespace Utils
@@ -45,6 +46,16 @@ namespace Utils
     {
         int result = argon2id_verify(hash.c_str(), password.data(), password.size());
         return result == ARGON2_OK;
+    }
+
+    inline bool isValidEmail(const std::string& email)
+    {
+        static const std::regex emailRegex
+        (
+            R"(^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,63}$)"
+        );
+
+        return std::regex_match(email, emailRegex);
     }
     
     class ExceptionCatcher : public drogon::HttpFilterBase

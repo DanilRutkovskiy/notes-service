@@ -24,7 +24,7 @@ AuthController::AuthController()
     }
 }
 
-void AuthController::registerUser(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
+void AuthController::createUser(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
 {
     Json::Value json = *req->getJsonObject();
     User user;
@@ -38,28 +38,39 @@ void AuthController::registerUser(const drogon::HttpRequestPtr &req, std::functi
         return;
     }
 
+    if (!Utils::isValidEmail(user.email))
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k400BadRequest);
+        resp->setBody("Not a valid email");
+        callback(std::move(resp));
+        return;
+    }
+
     auto userId = drogon::utils::getUuid();
     std::string passwordHash = Utils::hashPassword(user.password);
+
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
     auto transaction = drogon::app().getDbClient()->newTransaction();
     transaction->execSqlAsync
     (
         "INSERT INTO users (id, email, password_hash, role, is_active, created_at, updated_at) " 
         "VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)",
-        [callback = std::move(callback)](const drogon::orm::Result& result) 
+        [cb](const drogon::orm::Result& result) 
         {
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setBody("User registered");
             resp->setStatusCode(drogon::k201Created);
-            callback(resp);
+            (*cb)(resp);
         },
-        [callback = std::move(callback)](const drogon::orm::DrogonDbException& ex) 
+        [cb](const drogon::orm::DrogonDbException& ex) 
         {
             spdlog::error("Database error: {}", ex.base().what());
             auto resp = drogon::HttpResponse::newHttpResponse();
             resp->setBody("Error registering user");
             resp->setStatusCode(drogon::k500InternalServerError);
-            callback(resp);
+            (*cb)(resp);
         },
         userId, user.email, passwordHash, user.role, true
     );
