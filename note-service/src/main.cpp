@@ -20,6 +20,7 @@ int main()
         .addListener(Config::noteServiceHost.data(), Config::noteServicePort)
         .setThreadNum(std::thread::hardware_concurrency() - 1)
         .loadConfigFile("./note-service-drogon-db-config.json")
+        .registerFilter<JwtAuthFilter>(std::make_shared<JwtAuthFilter>())
         .run();
 
     return 0;

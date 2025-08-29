@@ -38,6 +38,14 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
+    auto userId = req->getAttributes()->get<std::string>("userId");
+    if (userId.empty())
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k401Unauthorized);
+        callback(resp);
+    }
+
     PostBody body;
     auto error = TemplateParser::parse(*json, body);
     if(error)
@@ -74,7 +82,7 @@ void NoteController::createNote(const drogon::HttpRequestPtr &req, std::function
             (*cb)(resp);
         },
         drogon::utils::getUuid(),
-        body.userId,
+        userId,
         body.title,
         body.content
     );

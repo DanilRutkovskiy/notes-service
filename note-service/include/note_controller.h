@@ -11,10 +11,10 @@ public:
     NoteController();
 public:
     METHOD_LIST_BEGIN
-        ADD_METHOD_TO(NoteController::createNote, "/notes", drogon::Post);
-        ADD_METHOD_TO(NoteController::readNote, "/notes/{id}", drogon::Get);
-        ADD_METHOD_TO(NoteController::updateNote, "/notes/{id}", drogon::Patch);
-        ADD_METHOD_TO(NoteController::deleteNote, "/notes/{id}", drogon::Delete);
+        ADD_METHOD_TO(NoteController::createNote, "/notes", drogon::Post, "JwtAuthFilter");
+        ADD_METHOD_TO(NoteController::readNote, "/notes/{id}", drogon::Get, "JwtAuthFilter");
+        ADD_METHOD_TO(NoteController::updateNote, "/notes/{id}", drogon::Patch, "JwtAuthFilter");
+        ADD_METHOD_TO(NoteController::deleteNote, "/notes/{id}", drogon::Delete, "JwtAuthFilter");
     METHOD_LIST_END
 
     void createNote(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
@@ -32,7 +32,6 @@ private:
 
     struct PostBody
     {
-        std::string userId;
         std::string title;
         std::string content;
 
@@ -42,11 +41,10 @@ private:
             PostBody result;
             result.content = row["content"].as<std::string>();
             result.title = row["title"].as<std::string>();
-            result.userId = row["user_id"].as<std::string>();
 
             return result;
         }
 
-        BOOST_DESCRIBE_CLASS(PostBody, (),(userId, title, content),(),());
+        BOOST_DESCRIBE_CLASS(PostBody, (),(title, content),(),());
     };
 };

@@ -31,7 +31,7 @@ public:
 
             if (decoded->has_payload_claim("sub"))
             {
-                req->getAttributes()->insert("user_id", decoded->get_payload_claim("sub").as_string());
+                req->getAttributes()->insert("userId", decoded->get_payload_claim("sub").as_string());
             }
 
             fccb();
