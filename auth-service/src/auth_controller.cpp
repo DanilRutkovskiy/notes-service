@@ -38,7 +38,7 @@ void AuthController::createUser(const drogon::HttpRequestPtr &req, std::function
         return;
     }
 
-    if (!Utils::isValidEmail(user.email))
+    if (!Utils::Email::isValidEmail(user.email))
     {
         auto resp = drogon::HttpResponse::newHttpResponse();
         resp->setStatusCode(drogon::k400BadRequest);
@@ -48,7 +48,7 @@ void AuthController::createUser(const drogon::HttpRequestPtr &req, std::function
     }
 
     auto userId = drogon::utils::getUuid();
-    std::string passwordHash = Utils::hashPassword(user.password);
+    std::string passwordHash = Utils::Password::hashPassword(user.password);
 
     auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr&)>>(std::move(callback));
 
@@ -82,7 +82,7 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
     auto email = (*body)["email"].as<std::string>();
     auto password = (*body)["password"].as<std::string>();
 
-    if (!Utils::isValidEmail(email))
+    if (!Utils::Email::isValidEmail(email))
     {
         auto resp = drogon::HttpResponse::newHttpResponse();
         resp->setStatusCode(drogon::k400BadRequest);
@@ -109,7 +109,7 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
             }
 
             auto passwordHash = result[0]["password_hash"].as<std::string>();
-            if (!Utils::verifyPassword(passwordHash, password))
+            if (!Utils::Password::verifyPassword(passwordHash, password))
             {
                 auto resp = drogon::HttpResponse::newHttpResponse();
                 resp->setStatusCode(drogon::k401Unauthorized);
@@ -118,7 +118,7 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
                 return;
             }
 
-            std::string token = Utils::generateJwt(result[0]["id"].as<std::string>());
+            std::string token = Utils::Jwt::generateJwt(result[0]["id"].as<std::string>());
 
             Json::Value respJson;
             respJson["token"] = token;
