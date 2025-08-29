@@ -73,23 +73,16 @@ namespace Utils
         return token;
     }
 
-    inline std::optional<jwt::decoded_jwt<jwt::traits::kazuho_picojson>> verifyJwt(const std::string &token)
+    inline jwt::decoded_jwt<jwt::traits::kazuho_picojson> verifyJwt(const std::string &token)
     {
-        try
-        {
-            auto decoded = jwt::decode<jwt::traits::kazuho_picojson>(token);
+        auto decoded = jwt::decode<jwt::traits::kazuho_picojson>(token);
 
-            auto verifier = jwt::verify<jwt::traits::kazuho_picojson>()
-                .allow_algorithm(jwt::algorithm::hs256{Config::jwtSecretKey.data()})
-                .with_issuer("auth-service");
+        auto verifier = jwt::verify<jwt::traits::kazuho_picojson>()
+            .allow_algorithm(jwt::algorithm::hs256{Config::jwtSecretKey.data()})
+            .with_issuer("auth-service");
 
-            verifier.verify(decoded);
-            return decoded;
-        }
-        catch (const std::exception &e)
-        {
-            spdlog::warn("JWT verification failed: {}", e.what());
-            return std::nullopt;
-        }
+        verifier.verify(decoded);
+
+        return decoded;
     }
 }
