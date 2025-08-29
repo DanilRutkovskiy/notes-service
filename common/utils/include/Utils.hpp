@@ -77,14 +77,14 @@ namespace Utils
     
     namespace Jwt
     {
-        inline std::string generateJwt(const std::string &userId)
+        inline std::string generateJwt(const std::string &userId, const std::chrono::hours duration = std::chrono::hours{1})
         {
                 auto token = jwt::create<jwt::traits::kazuho_picojson>()
                 .set_type("JWT")
                 .set_issuer("auth-service")
                 .set_subject(userId)
                 .set_issued_at(std::chrono::system_clock::now())
-                .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(1))
+                .set_expires_at(std::chrono::system_clock::now() + duration)
                 .sign(jwt::algorithm::hs256{Config::jwtSecretKey.data()});
 
             return token;

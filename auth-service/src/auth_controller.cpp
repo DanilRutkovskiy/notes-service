@@ -118,10 +118,14 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
                 return;
             }
 
-            std::string token = Utils::Jwt::generateJwt(result[0]["id"].as<std::string>());
+            auto userId = result[0]["id"].as<std::string>();
+
+            auto accessToken = Utils::Jwt::generateJwt(userId);
+            auto refreshToken = Utils::Jwt::generateJwt(userId, std::chrono::hours{24});
 
             Json::Value respJson;
-            respJson["token"] = token;
+            respJson["accessToken"] = accessToken;
+            respJson["refreshToken"] = accessToken;
 
             auto resp = drogon::HttpResponse::newHttpJsonResponse(respJson);
             resp->setStatusCode(drogon::k200OK);
@@ -137,4 +141,47 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
         },
         std::move(email)
     );
+}
+
+void AuthController::refreshToken(const drogon::HttpRequestPtr &req, std::function<void(const drogon::HttpResponsePtr &)> &&callback)
+{
+    auto json = req->getJsonObject();
+    if (!json || !(*json)["refresh_token"].isString())
+    {
+        auto resp = drogon::HttpResponse::newHttpJsonResponse(Json::Value("Missing refresh_token"));
+        resp->setStatusCode(drogon::k400BadRequest);
+        callback(resp);
+        return;
+    }
+
+    auto refreshToken = (*json)["refresh_token"].asString();
+
+    std::string userId;
+    try
+    {
+        auto decoded = Utils::Jwt::verifyJwt(refreshToken);
+        if (!decoded.has_payload_claim("sub"))
+        {
+            throw std::runtime_error("User id is not present in refresh token");
+        }
+        userId = decoded.get_payload_claim("sub").as_string();
+    }
+    catch(const std::exception& e)
+    {
+        auto resp = drogon::HttpResponse::newHttpResponse();
+        resp->setStatusCode(drogon::k401Unauthorized);
+        resp->setBody(std::format("Error verifying refresh token: {}", e.what()));
+        callback(resp);
+        return;
+    }
+
+    std::string newAccessToken = Utils::Jwt::generateJwt(userId);
+    std::string newRefreshToken = Utils::Jwt::generateJwt(userId, std::chrono::hours{24});
+
+    Json::Value respJson;
+    respJson["accessToken"] = newAccessToken;
+    respJson["refreshToken"] = newRefreshToken;
+
+    auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(respJson));
+    callback(resp);
 }

@@ -1,5 +1,5 @@
 #pragma once
-#include <drogon/HttpController.h>
+#include <BaseController.hpp>
 #include <hiredis/hiredis.h>
 #include <librdkafka/rdkafkacpp.h>
 
@@ -11,7 +11,7 @@ struct User
     BOOST_DESCRIBE_CLASS(User, (), (email, password, role), (), ())
 };
 
-class AuthController : public drogon::HttpController<AuthController> 
+class AuthController : public BaseController<AuthController> 
 {
 public:
     AuthController();
@@ -19,10 +19,12 @@ public:
     METHOD_LIST_BEGIN
         ADD_METHOD_TO(AuthController::createUser, "/users", drogon::Post);
         ADD_METHOD_TO(AuthController::loginUser, "/users/login", drogon::Post);
+        ADD_METHOD_TO(AuthController::refreshToken, "/users/refresh", drogon::Post);
     METHOD_LIST_END
 
     void createUser(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
     void loginUser(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+    void refreshToken(const drogon::HttpRequestPtr& req, std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 
 private:
     redisContext* m_redis;
