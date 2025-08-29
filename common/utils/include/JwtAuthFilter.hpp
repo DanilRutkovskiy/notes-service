@@ -74,14 +74,14 @@ public:
         {
             auto res = HttpResponse::newHttpResponse();
             res->setStatusCode(k401Unauthorized);
-            res->setBody(std::string("Invalid token: ") + e.what());
+            res->setBody(std::format("Invalid token: {}", e.what()));
             fcb(res);
         }
         catch (...)
         {
             auto res = HttpResponse::newHttpResponse();
             res->setStatusCode(k401Unauthorized);
-            res->setBody("Unknown error reading authorisation token");
+            res->setBody("Unknown error reading authorization token");
             fcb(res);
         }
     }
