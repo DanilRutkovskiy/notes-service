@@ -3,9 +3,9 @@
 #include <vector>
 #include <random>
 #include <regex>
-#include <drogon/HttpController.h>
 #include <jwt-cpp/jwt.h>
 #include <jwt-cpp/traits/kazuho-picojson/traits.h>
+#include <config.hpp>
 
 namespace Utils
 {
@@ -60,7 +60,7 @@ namespace Utils
         return std::regex_match(email, emailRegex);
     }
     
-    inline std::string generateJwt(const std::string &userId, const std::string &secret = "super_secret_key")
+    inline std::string generateJwt(const std::string &userId)
     {
          auto token = jwt::create<jwt::traits::kazuho_picojson>()
             .set_type("JWT")
@@ -68,20 +68,19 @@ namespace Utils
             .set_subject(userId)
             .set_issued_at(std::chrono::system_clock::now())
             .set_expires_at(std::chrono::system_clock::now() + std::chrono::hours(1))
-            .sign(jwt::algorithm::hs256{secret});
+            .sign(jwt::algorithm::hs256{Config::jwtSecretKey.data()});
 
         return token;
     }
 
-    inline std::optional<jwt::decoded_jwt<jwt::traits::kazuho_picojson>> verifyJwt(const std::string &token, 
-                                                                                   const std::string &secret = "super_secret_key")
+    inline std::optional<jwt::decoded_jwt<jwt::traits::kazuho_picojson>> verifyJwt(const std::string &token)
     {
         try
         {
             auto decoded = jwt::decode<jwt::traits::kazuho_picojson>(token);
 
             auto verifier = jwt::verify<jwt::traits::kazuho_picojson>()
-                .allow_algorithm(jwt::algorithm::hs256{secret})
+                .allow_algorithm(jwt::algorithm::hs256{Config::jwtSecretKey.data()})
                 .with_issuer("auth-service");
 
             verifier.verify(decoded);

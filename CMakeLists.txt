@@ -21,6 +21,8 @@ option(USE_VCPKG "Whether to use VCPKG" ON)
     ##KAFKA
     set(KAFKA_PORT "9092")
     set(KAFKA_HOST "127.0.0.1")
+    #JWT-secret-key
+    set(JWT_SECRET_KEY "jX7Bgw+Fe1L9zLllVtblTjhiQXKgL0cPDebVziklnrZzm5Rct/oBMM4OAipw1i6vsKkBixD9LH/PchuHzoo6TQ==")
     ##note-service
     set(NOTE_SERVICE_HOST "0.0.0.0")
     set(NOTE_SERVICE_PORT "8080")

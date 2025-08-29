@@ -1,11 +1,11 @@
 #pragma once
 
-#include <drogon/HttpController.h>
+#include <BaseController.hpp>
 #include <hiredis/hiredis.h>
 #include <librdkafka/rdkafkacpp.h>
 #include <string>
 
-class NoteController : public drogon::HttpController<NoteController>
+class NoteController : public BaseController<NoteController>
 {
 public:
     NoteController();
