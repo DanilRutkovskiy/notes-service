@@ -18,13 +18,8 @@ CREATE TABLE users
 --changeset danil:3
 CREATE TABLE refresh_tokens 
 (
-    id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     token_hash TEXT NOT NULL,
-    expires_at TIMESTAMP NOT NULL,
-    revoked_at TIMESTAMP,
-    user_agent TEXT,
-    ip INET,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 --rollback DROP TABLE refresh_tokens;

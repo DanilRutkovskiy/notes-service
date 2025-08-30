@@ -77,11 +77,35 @@ namespace Utils
     
     namespace Jwt
     {
-        inline std::string generateJwt(const std::string &userId, const std::chrono::hours duration = std::chrono::hours{1})
+        enum class TokenType
+        {
+            ACCESS,
+            REFRESH
+        };
+
+        inline std::string toString(TokenType type)
+        {
+            switch(type)
+            {
+                case TokenType::ACCESS: return "access";
+                case TokenType::REFRESH: return "refresh";
+            }
+        }
+
+        inline bool fromString(const std::string& strType, TokenType& enumType)
+        {
+            if(toString(TokenType::ACCESS) == strType) return enumType = TokenType::ACCESS, true;
+            if(toString(TokenType::REFRESH) == strType) return enumType = TokenType::REFRESH, true;
+
+            return false;
+        }
+
+        inline std::string generateJwt(const std::string &userId, TokenType type, const std::chrono::hours duration = std::chrono::hours{1})
         {
                 auto token = jwt::create<jwt::traits::kazuho_picojson>()
                 .set_type("JWT")
                 .set_issuer("auth-service")
+                .set_payload_claim("type", jwt::traits::kazuho_picojson::value_type{toString(type)})
                 .set_subject(userId)
                 .set_issued_at(std::chrono::system_clock::now())
                 .set_expires_at(std::chrono::system_clock::now() + duration)
@@ -90,7 +114,13 @@ namespace Utils
             return token;
         }
 
-        inline jwt::decoded_jwt<jwt::traits::kazuho_picojson> verifyJwt(const std::string &token)
+        struct DecodedToken
+        {
+            TokenType type = TokenType::ACCESS;
+            jwt::decoded_jwt<jwt::traits::kazuho_picojson> decoded;
+        };
+
+        inline DecodedToken verifyJwt(const std::string &token)
         {
             auto decoded = jwt::decode<jwt::traits::kazuho_picojson>(token);
 
@@ -100,7 +130,21 @@ namespace Utils
 
             verifier.verify(decoded);
 
-            return decoded;
+            if (!decoded.has_payload_claim("sub"))
+            {
+                throw std::runtime_error("User id is not present in token");
+            }
+
+            TokenType tokenType;
+            if (!decoded.has_payload_claim("type") || 
+                !fromString(decoded.get_payload_claim("type").as_string(), tokenType))
+            {
+                throw std::runtime_error("Error getting token type");
+            }
+
+            DecodedToken result{.type = tokenType, .decoded = std::move(decoded)};
+
+            return result;
         }
     }//namespace Jwt
 }//namespace Utils

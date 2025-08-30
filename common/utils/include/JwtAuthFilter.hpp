@@ -27,9 +27,9 @@ public:
 
         try
         {
-            auto decoded = Utils::Jwt::verifyJwt(token);
+            auto data = Utils::Jwt::verifyJwt(token);
 
-            req->getAttributes()->insert("userId", decoded.get_payload_claim("sub").as_string());
+            req->getAttributes()->insert("userId", data.decoded.get_payload_claim("sub").as_string());
 
             fccb();
         }

@@ -97,7 +97,7 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
     transaction->execSqlAsync
     (
         "SELECT id, password_hash FROM users WHERE email = $1",
-        [cb, password = std::move(password)](const drogon::orm::Result& result)
+        [cb, transaction, password = std::move(password)](const drogon::orm::Result& result)
         {
             if (result.empty())
             {
@@ -120,8 +120,18 @@ void AuthController::loginUser(const drogon::HttpRequestPtr &req, std::function<
 
             auto userId = result[0]["id"].as<std::string>();
 
-            auto accessToken = Utils::Jwt::generateJwt(userId);
-            auto refreshToken = Utils::Jwt::generateJwt(userId, std::chrono::hours{24});
+            auto accessToken = Utils::Jwt::generateJwt(userId, Utils::Jwt::TokenType::ACCESS);
+            auto refreshToken = Utils::Jwt::generateJwt(userId, Utils::Jwt::TokenType::REFRESH, std::chrono::hours{24});
+
+            transaction->execSqlAsync
+            (
+                "INSERT INTO refresh_tokens(user_id, token_hash) "
+                "VALUES($1, $2) ON CONFLICT(user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash;",
+                [](const drogon::orm::Result& result){},
+                [](const drogon::orm::DrogonDbException& ex){},
+                userId,
+                Utils::Password::hashPassword(refreshToken)
+            );
 
             Json::Value respJson;
             respJson["accessToken"] = accessToken;
@@ -159,12 +169,12 @@ void AuthController::refreshToken(const drogon::HttpRequestPtr &req, std::functi
     std::string userId;
     try
     {
-        auto decoded = Utils::Jwt::verifyJwt(refreshToken);
-        if (!decoded.has_payload_claim("sub"))
+        auto verifiedToken = Utils::Jwt::verifyJwt(refreshToken);
+        if (verifiedToken.type != Utils::Jwt::TokenType::REFRESH)
         {
-            throw std::runtime_error("User id is not present in refresh token");
+            throw std::runtime_error(std::format("Expected refresh token, got: {}", toString(verifiedToken.type)));
         }
-        userId = decoded.get_payload_claim("sub").as_string();
+        userId = verifiedToken.decoded.get_payload_claim("sub").as_string();
     }
     catch(const std::exception& e)
     {
@@ -175,13 +185,64 @@ void AuthController::refreshToken(const drogon::HttpRequestPtr &req, std::functi
         return;
     }
 
-    std::string newAccessToken = Utils::Jwt::generateJwt(userId);
-    std::string newRefreshToken = Utils::Jwt::generateJwt(userId, std::chrono::hours{24});
+    auto cb = std::make_shared<std::function<void(const drogon::HttpResponsePtr &)>>(std::move(callback));
+    auto transaction = drogon::app().getDbClient()->newTransaction();
 
-    Json::Value respJson;
-    respJson["accessToken"] = newAccessToken;
-    respJson["refreshToken"] = newRefreshToken;
+    transaction->execSqlAsync
+    (
+        "SELECT token_hash, user_id FROM refresh_tokens WHERE user_id = $1",
+        [cb, transaction, refreshToken = std::move(refreshToken), userId = std::move(userId)]
+        (const drogon::orm::Result& result)
+        {
+            if (result.empty())
+            {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k404NotFound);
+                resp->setBody("Refresh token does not exists");
+                (*cb)(resp);
+                return;
+            }
 
-    auto resp = drogon::HttpResponse::newHttpJsonResponse(std::move(respJson));
-    callback(resp);
+            auto tokenHash = result[0]["token_hash"].as<std::string>();
+
+            if (!Utils::Password::verifyPassword(tokenHash, refreshToken))
+            {
+                auto resp = drogon::HttpResponse::newHttpResponse();
+                resp->setStatusCode(drogon::k401Unauthorized);
+                resp->setBody("Error refresh token verification");
+                (*cb)(resp);
+                return;
+            }
+
+            auto accessToken = Utils::Jwt::generateJwt(userId, Utils::Jwt::TokenType::ACCESS);
+            auto refreshToken = Utils::Jwt::generateJwt(userId, Utils::Jwt::TokenType::REFRESH, std::chrono::hours{24});
+
+            transaction->execSqlAsync
+            (
+                "INSERT INTO refresh_tokens(user_id, token_hash) "
+                "VALUES($1, $2) ON CONFLICT(user_id) DO UPDATE SET token_hash = EXCLUDED.token_hash;",
+                [](const drogon::orm::Result& result){},
+                [](const drogon::orm::DrogonDbException& ex){},
+                userId,
+                Utils::Password::hashPassword(refreshToken)
+            );
+
+            Json::Value respJson;
+            respJson["accessToken"] = accessToken;
+            respJson["refreshToken"] = refreshToken;
+
+            auto resp = drogon::HttpResponse::newHttpJsonResponse(respJson);
+            resp->setStatusCode(drogon::k200OK);
+            (*cb)(resp);
+        },
+        [cb](const drogon::orm::DrogonDbException& ex)
+        {
+            spdlog::error("Database error: {}", ex.base().what());
+            auto resp = drogon::HttpResponse::newHttpResponse();
+            resp->setBody(std::format("Database error: {}", ex.base().what()));
+            resp->setStatusCode(drogon::k500InternalServerError);
+            (*cb)(resp);
+        },
+        std::move(userId)
+    );
 }
